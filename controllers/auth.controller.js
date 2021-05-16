@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const jwt = require ("jsonwebtoken");
 const { getUserIdByToken, logoutUser } = require("../models/auth.model");
+const axios = require('axios');
 
 
 exports.logout = (req,res) => {
@@ -15,4 +16,17 @@ exports.logout = (req,res) => {
             .catch((err) => res.send(err.message));
         })
         .catch((err) => res.send(err.message));
+}
+
+exports.getLatency = function(req,res){
+    let date1= new Date();
+    axios.get('https://google.com')
+        .then(function (response) {
+            let date2 = new Date();
+            let latency = date2-date1;
+            res.send({latency: latency});
+        })
+        .catch(function (error) {
+            res.send(error.message);
+        })
 }
