@@ -12,3 +12,10 @@ CREATE DATABASE users_db;
  if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
     return req.headers.authorization.split(' ')[1];
   }
+
+  CREATE TABLE tokens (
+    user_id INT NOT NULL,
+    token TEXT NOT NULL,
+    CONSTRAINT users_user_id_fk FOREIGN KEY (user_id)
+    REFERENCES users (user_id)
+  );
