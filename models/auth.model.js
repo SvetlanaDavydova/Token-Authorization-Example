@@ -12,7 +12,7 @@ connection.connect(function(err){
     console.log("подключено к базе данных");
 })
 
-exports.saveToken = function(user_id, token){
+exports.saveToken = async function(user_id, token){
     return new Promise((resolve,reject) => {
         connection.query("INSERT INTO tokens VALUES (?,?)", [user_id, token],
         (err,results,fields) => {
@@ -23,7 +23,7 @@ exports.saveToken = function(user_id, token){
         })
     })
 }
-exports.getUserIdByToken = function(token){
+exports.getUserIdByToken = async function(token){
     console.log(token);
     return new Promise( (resolve,reject) => {
         connection.query(" SELECT user_id FROM tokens WHERE token = (?)", [token],
@@ -35,7 +35,7 @@ exports.getUserIdByToken = function(token){
     })
 }
 
-exports.logoutUser = function(user_id, full, token){
+exports.logoutUser = async function(user_id, full, token){
     return new Promise( (resolve,reject) => {
          if(full){
              console.log(user_id);

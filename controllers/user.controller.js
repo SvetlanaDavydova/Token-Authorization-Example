@@ -1,72 +1,55 @@
-const express = require("express");
 const { signUp, login, getUserInfo } = require("../models/user.model");
-const app = express();
 const jwt = require ("jsonwebtoken");
 const { saveToken, getUserIdByToken } = require("../models/auth.model");
 
 
+exports.userSignUp = async (req, res) => {
+    try{
+        let { email, phone, password} = req.body;
+        let insertId = await signUp(email, phone, password);
+        let data = {
+            user_id: insertId,
+            email: email
+        };
+        let signature = "asdederftgyh";
+        let expiration_ms = 300;
+        let token = jwt.sign({ data }, signature, { expiresIn: expiration_ms });
+        await saveToken(insertId, token);
+        res.send( "Bearer " + token);
+    } catch (err) {
+        res.status(500).send(err.message);
+    }
+}  
 
-exports.userSignUp = (req,res) => {
-    let { email, phone, password} = req.body; 
-
-    signUp(email, phone, password) 
-        .then((insertId) => {
+exports.userLogIn = async (req, res) => { 
+    try {
+        let user = await login(req.body.email);
+        if(!results.user_id) {
+            throw new Error("User not found")
+        }
+        if (results.user_password == req.body.password){
             let data = {
-                user_id: insertId,
-                email: email
-            }
+                user_id: results.user_id,
+                email: req.body.email
+            }            
             let signature = "asdederftgyh";
             let expiration_ms = 300 ;
-            let token = jwt.sign({data} , signature, {expiresIn: expiration_ms});
-            saveToken(insertId, token)
-                .then((results) => {                
-                    res.send ( "Bearer " + token);
-                })
-                .catch((err) => res.send(err.message));
-        })
-        .catch((err) => res.status(500).send("Error!"));
+            let token = jwt.sign({data}, signature, {expiresIn: expiration_ms});
+            await saveToken(user.user_id, token);
+            res.send("Bearer " + token);
+        }
+    } catch(err){
+        res.status(400).send("unauthorized");
+    }
 }
 
-
-exports.userLogIn = (req,res) => { 
-
-    login(req.body.email)
-        .then((results) => {  
-            if(!results.user_id) {
-                throw new Error("User not found")
-            } else if (results.user_password == req.body.password){
-                let data = {
-                    user_id: results.user_id,
-                    email: req.body.email
-                }
-                
-                let signature = "asdederftgyh";
-                let expiration_ms = 300 ;
-                let token = jwt.sign({data}, signature, {expiresIn: expiration_ms});
-                saveToken(results.user_id, token)
-                .then((results) => {                
-                    res.send ( "Bearer " + token);
-                })
-                .catch((err) => res.send(err.message));
-            
-            }else{
-                res.status(400).send("unauthorized");
-            }}
-        )
-        .catch((err) => {
-            res.status(500).send(err.message)
-        });
+exports.getInfo = async (req,res) => {
+    try{
+        let token = req.headers.authorization.split(' ')[1];
+        let user_id = await getUserIdByToken(token);
+        let results = await getUserInfo(user_id);
+        res.send(results);
+    } catch (err){
+        res.send(err.message);
+    }
 }
-
-exports.getInfo = (req,res) => {
-    let token = req.headers.authorization.split(' ')[1];
-    //console.log(token);
-    getUserIdByToken(token)
-        .then((user_id) => {
-            getUserInfo(user_id)
-            .then((results) => res.send(results))
-            .catch((err) => res.send(err.message));
-        })
-        .catch((err) => res.send(err.message));
-}
-
