@@ -1,57 +1,28 @@
-const mysql = require("mysql2");
-const connection = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    database: "users_db",
-    password:"root"
-})
-connection.connect(function(err){
-    if(err){
-        return console.error("ошибка");
-    } 
-    console.log("подключено к базе данных");
-})
-
+const {getConnection} = require("../config/dbconfig");
 exports.saveToken = async function(user_id, token){
-    return new Promise((resolve,reject) => {
-        connection.query("INSERT INTO tokens VALUES (?,?)", [user_id, token],
-        (err,results,fields) => {
-            if(err) {
-                reject (err);
-            }
-            resolve (results);
-        })
-    })
+    const connection = await getConnection();
+    const query = "INSERT INTO tokens VALUES (?,?)";
+    const [rows,fields] = await connection.execute(query, [user_id, token]);
+    return rows;
 }
+
 exports.getUserIdByToken = async function(token){
-    console.log(token);
-    return new Promise( (resolve,reject) => {
-        connection.query(" SELECT user_id FROM tokens WHERE token = (?)", [token],
-        (err, results, fields) => {
-            if(err) reject (err.message);
-            resolve( results[0].user_id);
-            
-        })
-    })
+    const connection = await getConnection();
+    const query = " SELECT user_id FROM tokens WHERE token = (?)";
+    const [rows,fields] = await connection.execute(query, [token]);
+    return rows.user_id;
 }
 
 exports.logoutUser = async function(user_id, full, token){
-    return new Promise( (resolve,reject) => {
-         if(full){
-             console.log(user_id);
-            connection.query(" DELETE FROM tokens WHERE user_id = (?)", [user_id],
-            (err, results, fields) => {
-                if(err) reject (err.message);
-                resolve( results);
-                
-            })
-        } else {
-            connection.query(" DELETE * FROM tokens WHERE token = (?)", [token],
-            (err, results, fields) => {
-                if(err) reject (err.message);
-                resolve( results);
-                
-            })
-        }
-    })
+    const connection = await getConnection();
+
+    if(full){
+        const query = " DELETE FROM tokens WHERE user_id = (?)";
+        const [rows,fields] = await connection.execute(query, [user_id]);
+        return rows;
+    } else {
+        const query = " DELETE * FROM tokens WHERE token = (?)";
+        const [rows,fields] = await connection.execute(query, [token]);
+        return rows;
+    }
 }
