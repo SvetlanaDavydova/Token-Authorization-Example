@@ -17,12 +17,12 @@ exports.logoutUser = async function(user_id, full, token){
     const connection = await getConnection();
 
     if(full){
-        const query = " DELETE FROM tokens WHERE user_id = (?)";
-        const [rows,fields] = await connection.execute(query, [user_id]);
+        const query = "DELETE FROM tokens WHERE user_id = (?)";
+        const [rows, fields] = await connection.execute(query, [user_id]);
         return rows;
     } else {
-        const query = " DELETE * FROM tokens WHERE token = (?)";
-        const [rows,fields] = await connection.execute(query, [token]);
+        const query = "DELETE FROM tokens WHERE token = (?)";
+        const [rows, fields] = await connection.execute(query, [token]);
         return rows;
     }
 }
