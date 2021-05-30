@@ -1,6 +1,7 @@
 const { signUp, login, getUserInfo } = require("../models/user.model");
 const jwt = require ("jsonwebtoken");
 const { saveToken, getUserIdByToken } = require("../models/auth.model");
+const{JWTSECRET, JWTTIME} = require("../constants/common");
 
 
 exports.userSignUp = async (req, res) => {
@@ -11,9 +12,7 @@ exports.userSignUp = async (req, res) => {
             user_id: insertId,
             email: email
         };
-        let signature = "asdederftgyh";
-        let expiration_ms = 300;
-        let token = jwt.sign({ data }, signature, { expiresIn: expiration_ms });
+        let token = jwt.sign({ data }, JWTSECRET, { expiresIn: JWTTIME });
         await saveToken(insertId, token);
         res.send( "Bearer " + token);
     } catch (err) {
@@ -32,9 +31,7 @@ exports.userLogIn = async (req, res) => {
                 user_id: results.user_id,
                 email: req.body.email
             }            
-            let signature = "asdederftgyh";
-            let expiration_ms = 300 ;
-            let token = jwt.sign({data}, signature, {expiresIn: expiration_ms});
+            let token = jwt.sign({data}, JWTSECRET, {expiresIn: JWTTIME});
             await saveToken(user.user_id, token);
             res.send("Bearer " + token);
         }

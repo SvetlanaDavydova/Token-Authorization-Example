@@ -3,7 +3,13 @@ const axios = require('axios');
 
 
 exports.logout = async (req,res) => {
-    let token = req.headers.authorization.split(' ')[1];
+    let token = "";
+    try {
+        token = req.headers.authorization.split(' ')[1];
+    } catch (error) {
+        return res.status(401).send("unauthorized");
+    }   
+    
     let isFull = req.query.full;
 
     try{
